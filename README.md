@@ -1,2 +1,1 @@
-# class-docker-app
-Repository for my test docker images
+# clovis-dh-lab-images
