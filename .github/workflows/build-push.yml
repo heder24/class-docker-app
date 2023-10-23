@@ -2,8 +2,8 @@ name: Build and Deploy to Docker Hub
 env:
   DOCKER_USER: ${{secrets.DOCKER_HUB_USER}}
   DOCKER_PASSWORD: ${{secrets.DOCKER_HUB_TOKEN}}
-  DOCKER_REPOSITORY: nodejs-app
-  NODE_IMAGE_TAG: nodejs-app
+  DOCKER_REPOSITORY: class-docker-app
+  NODE_IMAGE_TAG: nodejs-app-
 
 on:
   push:
@@ -29,6 +29,7 @@ jobs:
       with: 
         image: ${{env.DOCKER_USER}}/${{env.DOCKER_REPOSITORY}}:${{env.NODE_IMAGE_TAG}}
         annotations: true
+        Severity: CRITICAL
 
     - name: Push Image to Docker Hub    
       run: |
