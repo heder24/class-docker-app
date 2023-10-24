@@ -4,20 +4,24 @@ env:
   DOCKER_PASSWORD: ${{secrets.DOCKER_HUB_TOKEN}}
   DOCKER_REPOSITORY: class-docker-app
   NODE_IMAGE_TAG: nodejs-app-v1
+
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
+
+permissions:
+  actions: read
+  security-events: write
   
 jobs:
   
-  build-scan-protect:
+  build-scan-upload-codeql:
     
     name: Build and Scan Docker Images
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
       uses: actions/checkout@v3
-
     - name: Build and tag Image
       run: |
         docker build -t ${{env.DOCKER_USER}}/${{env.DOCKER_REPOSITORY}}:${{env.NODE_IMAGE_TAG}} .
@@ -27,10 +31,16 @@ jobs:
       uses: crazy-max/ghaction-container-scan@v3
       with: 
         image: ${{env.DOCKER_USER}}/${{env.DOCKER_REPOSITORY}}:${{env.NODE_IMAGE_TAG}}
-        severity : CRITICAL
-        severity_threshold: CRITICAL
         annotations: true
-       
+        dockerfile: ./Dockerfile
+        severity: CRITICAL
+
+    - name: Upload SARIF file
+      if: ${{ steps.scan.outputs.sarif != '' }}
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.scan.outputs.sarif }}
+
     - name: Push Image to Docker Hub    
       run: |
         docker login -u ${{env.DOCKER_USER}} -p ${{env.DOCKER_PASSWORD}}
